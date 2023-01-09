@@ -76,3 +76,31 @@ def test_unicode_support(memgraph):
     assert loaded_user4.last_name == "doe"
     assert loaded_user5.name == "jack"
     assert loaded_user5.last_name == "\u0013"
+
+
+@pytest.mark.parametrize("database", ["neo4j", "memgraph"], indirect=True)
+def test_list_property(database):
+    class User(Node):
+        my_list: list
+
+    user = User(my_list=[1, 2, 3]).save(database)
+
+    loaded_user = database.load_node(user)
+
+    assert type(loaded_user) is User
+    assert "my_list" in User.__fields__
+    assert loaded_user.my_list == [1, 2, 3]
+
+
+@pytest.mark.parametrize("database", ["neo4j", "memgraph"], indirect=True)
+def test_dict_property(database):
+    class User(Node):
+        my_dict: dict
+
+    user = User(my_dict={"key": "value"}).save(database)
+
+    loaded_user = database.load_node(user)
+
+    assert type(loaded_user) is User
+    assert "my_dict" in User.__fields__
+    assert loaded_user.dict == {"key": "value"}
